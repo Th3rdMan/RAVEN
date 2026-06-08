@@ -132,13 +132,9 @@
         <div class="checker-bar">
           <div class="checker-left">
             <span class="proxy-badge" id="proxy-badge" data-state="offline">⬤ Proxy</span>
-            <input type="url" id="proxy-url-input" class="proxy-url-input"
-                   placeholder="http://localhost:7472 ou URL Cloudflare Worker"
-                   aria-label="URL du proxy RAVEN" autocomplete="off" spellcheck="false">
-            <button id="btn-proxy-save" class="btn-proxy-save" title="Tester et enregistrer l'URL">✓</button>
+            <span class="checker-info" id="checker-info"></span>
           </div>
           <div class="checker-right">
-            <span class="checker-info" id="checker-info"></span>
             <div class="checker-progress" id="checker-progress" style="display:none">
               <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
               <span class="progress-text" id="progress-text">0 / 0</span>

@@ -289,22 +289,7 @@ function switchTab(tabName) {
 
 // ── Auto-checker ───────────────────────────────────────────────────────────────
 
-function initProxyUrlInput() {
-  const input = document.getElementById('proxy-url-input');
-  if (!input) return;
-  const saved = Storage.get('proxy_url', '');
-  input.value = saved || '';
-}
-
-async function saveProxyUrl() {
-  const input = document.getElementById('proxy-url-input');
-  const url   = input ? input.value.trim() : '';
-  Storage.set('proxy_url', url || null);
-  await initChecker();
-}
-
 async function initChecker() {
-  initProxyUrlInput();
   const available = await Checker.ping();
   setCheckerUI(available ? 'ready' : 'offline');
 }
@@ -325,7 +310,7 @@ function setCheckerUI(state) {
     btnStop.style.display   = 'none';
     btnStart.style.display  = '';
     progress.style.display  = 'none';
-    info.textContent        = 'Proxy inaccessible — vérifiez l\'URL';
+    info.textContent        = 'Service indisponible';
   } else if (state === 'ready') {
     badge.textContent       = '⬤ Proxy actif';
     btnStart.disabled       = false;
@@ -590,10 +575,6 @@ function bindEvents() {
   // Auto-checker controls
   document.getElementById('btn-check-all').addEventListener('click', startAutoCheck);
   document.getElementById('btn-check-stop').addEventListener('click', stopAutoCheck);
-  document.getElementById('btn-proxy-save').addEventListener('click', saveProxyUrl);
-  document.getElementById('proxy-url-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') saveProxyUrl();
-  });
 
   document.getElementById('import-file-input').addEventListener('change', (e) => {
     const file = e.target.files[0];

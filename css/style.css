@@ -460,40 +460,6 @@ body {
 .proxy-badge[data-state="running"] { color: var(--accent); }
 .proxy-badge[data-state="done"]    { color: var(--state-ok); }
 
-.proxy-url-input {
-  flex: 1;
-  min-width: 180px;
-  max-width: 340px;
-  padding: 5px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 12px;
-  font-family: monospace;
-  background: #fff;
-  color: var(--text);
-}
-
-.proxy-url-input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.btn-proxy-save {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--state-ok);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 4px 10px;
-  line-height: 1;
-  transition: background .1s;
-  flex-shrink: 0;
-}
-
-.btn-proxy-save:hover { background: #E8F5E9; }
-
 .checker-info {
   font-size: 12px;
   color: #999;
@@ -791,7 +757,6 @@ body {
   /* Checker bar: stack vertically */
   .checker-bar { flex-direction: column; align-items: flex-start; }
   .checker-left, .checker-right { flex-wrap: wrap; width: 100%; }
-  .proxy-url-input { max-width: 100%; min-width: 0; flex: 1; }
   .progress-bar { width: 100px; }
 
   /* Wordlist textarea */
