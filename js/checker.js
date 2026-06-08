@@ -1,12 +1,21 @@
 /**
- * @fileoverview Auto-checker — communicates with the local RAVEN proxy (server.js)
- * to verify each generated link without manual clicking.
+ * @fileoverview Auto-checker — communicates with a RAVEN proxy (local server.js
+ * or a deployed Cloudflare Worker) to verify each generated link automatically.
  *
- * The proxy must be running on http://localhost:7472 (node server.js).
+ * The proxy URL is persisted in localStorage under "raven_proxy_url".
+ * Default fallback: http://localhost:7472 (local server.js).
  */
 const Checker = (() => {
-  /** @type {string} Base URL of the local proxy server. */
-  const PROXY = 'http://localhost:7472';
+  /** @type {string} Fallback proxy when none is configured. */
+  const DEFAULT_PROXY = 'http://localhost:7472';
+
+  /**
+   * Returns the active proxy base URL (from Storage or the default).
+   * @returns {string}
+   */
+  function getProxyUrl() {
+    return (Storage.get('proxy_url', '') || DEFAULT_PROXY).replace(/\/$/, '');
+  }
 
   /**
    * Pings the proxy to test whether it is reachable.
@@ -14,7 +23,7 @@ const Checker = (() => {
    */
   async function ping() {
     try {
-      const res = await fetch(`${PROXY}/ping`, { signal: AbortSignal.timeout(2000) });
+      const res = await fetch(`${getProxyUrl()}/ping`, { signal: AbortSignal.timeout(3000) });
       return res.ok;
     } catch {
       return false;
@@ -30,7 +39,7 @@ const Checker = (() => {
   async function checkUrl(url) {
     try {
       const res = await fetch(
-        `${PROXY}/check?url=${encodeURIComponent(url)}`,
+        `${getProxyUrl()}/check?url=${encodeURIComponent(url)}`,
         { signal: AbortSignal.timeout(12000) }
       );
       if (!res.ok) return -1;
@@ -44,12 +53,12 @@ const Checker = (() => {
   /**
    * Maps an HTTP status code to a RAVEN link-state value.
    *
-   * | Status          | State | Meaning          |
-   * |-----------------|-------|------------------|
-   * | 200             | 2     | 🟢 Probably found |
-   * | 404 / 410       | 0     | 🔴 Not found      |
-   * | 3xx / 403 / 429 | 1     | 🟡 Uncertain      |
-   * | 5xx / -1        | null  | Leave unchanged   |
+   * | Status          | State | Meaning           |
+   * |-----------------|-------|-------------------|
+   * | 200             | 2     | 🟢 Probably found  |
+   * | 404 / 410       | 0     | 🔴 Not found       |
+   * | 3xx / 403 / 429 | 1     | 🟡 Uncertain       |
+   * | 5xx / -1        | null  | Leave unchanged    |
    *
    * @param {number} status
    * @returns {0|1|2|null}
@@ -80,7 +89,7 @@ const Checker = (() => {
     async function worker() {
       while (index < total) {
         if (signal?.aborted) return;
-        const link  = links[index++];
+        const link   = links[index++];
         const status = await checkUrl(link.url);
         const state  = statusToState(status);
         completed++;
@@ -92,5 +101,5 @@ const Checker = (() => {
     await Promise.all(Array.from({ length: Math.min(concurrency, total) }, worker));
   }
 
-  return { ping, checkUrl, statusToState, runAll };
+  return { getProxyUrl, ping, checkUrl, statusToState, runAll };
 })();

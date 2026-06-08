@@ -289,7 +289,22 @@ function switchTab(tabName) {
 
 // ── Auto-checker ───────────────────────────────────────────────────────────────
 
+function initProxyUrlInput() {
+  const input = document.getElementById('proxy-url-input');
+  if (!input) return;
+  const saved = Storage.get('proxy_url', '');
+  input.value = saved || '';
+}
+
+async function saveProxyUrl() {
+  const input = document.getElementById('proxy-url-input');
+  const url   = input ? input.value.trim() : '';
+  Storage.set('proxy_url', url || null);
+  await initChecker();
+}
+
 async function initChecker() {
+  initProxyUrlInput();
   const available = await Checker.ping();
   setCheckerUI(available ? 'ready' : 'offline');
 }
@@ -305,34 +320,34 @@ function setCheckerUI(state) {
   badge.dataset.state = state;
 
   if (state === 'offline') {
-    badge.textContent  = '⬤ Proxy inactif';
-    btnStart.disabled  = true;
-    btnStop.style.display  = 'none';
-    btnStart.style.display = '';
-    progress.style.display = 'none';
-    info.innerHTML = 'Lancez <code>node server.js</code>';
+    badge.textContent       = '⬤ Proxy inactif';
+    btnStart.disabled       = true;
+    btnStop.style.display   = 'none';
+    btnStart.style.display  = '';
+    progress.style.display  = 'none';
+    info.textContent        = 'Proxy inaccessible — vérifiez l\'URL';
   } else if (state === 'ready') {
-    badge.textContent  = '⬤ Proxy actif';
-    btnStart.disabled  = false;
-    btnStop.style.display  = 'none';
-    btnStart.style.display = '';
-    progress.style.display = 'none';
+    badge.textContent       = '⬤ Proxy actif';
+    btnStart.disabled       = false;
+    btnStop.style.display   = 'none';
+    btnStart.style.display  = '';
+    progress.style.display  = 'none';
     const results = Storage.get('results', null);
     const count   = results ? results.variants.length * Sites.getSites().length : 0;
     info.textContent = count ? `${count} liens à vérifier` : '';
   } else if (state === 'running') {
-    badge.textContent  = '⬤ Vérification…';
-    btnStart.disabled  = true;
-    btnStart.style.display = 'none';
-    btnStop.style.display  = '';
-    progress.style.display = '';
+    badge.textContent       = '⬤ Vérification…';
+    btnStart.disabled       = true;
+    btnStart.style.display  = 'none';
+    btnStop.style.display   = '';
+    progress.style.display  = '';
   } else if (state === 'done') {
-    badge.textContent  = '⬤ Proxy actif';
-    btnStart.disabled  = false;
-    btnStart.style.display = '';
-    btnStop.style.display  = 'none';
-    progress.style.display = 'none';
-    info.textContent = 'Vérification terminée';
+    badge.textContent       = '⬤ Proxy actif';
+    btnStart.disabled       = false;
+    btnStart.style.display  = '';
+    btnStop.style.display   = 'none';
+    progress.style.display  = 'none';
+    info.textContent        = 'Vérification terminée';
   }
 }
 
@@ -575,6 +590,10 @@ function bindEvents() {
   // Auto-checker controls
   document.getElementById('btn-check-all').addEventListener('click', startAutoCheck);
   document.getElementById('btn-check-stop').addEventListener('click', stopAutoCheck);
+  document.getElementById('btn-proxy-save').addEventListener('click', saveProxyUrl);
+  document.getElementById('proxy-url-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveProxyUrl();
+  });
 
   document.getElementById('import-file-input').addEventListener('change', (e) => {
     const file = e.target.files[0];
