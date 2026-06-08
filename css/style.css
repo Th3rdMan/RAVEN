@@ -1,20 +1,20 @@
 /* ── Variables — Dark theme ───────────────────────────────────────────────── */
 :root {
-  --bg:           #080D14;
-  --card-bg:      #0C1526;
-  --card-bg-alt:  #0A1220;
-  --text:         #CDD9F0;
-  --text-muted:   #4E6488;
+  --bg:           #030609;
+  --card-bg:      #060D1A;
+  --card-bg-alt:  #040810;
+  --text:         #B0C4E4;
+  --text-muted:   #3A5070;
   --accent:       #2979FF;
-  --accent-dim:   rgba(41,121,255,.12);
-  --accent-glow:  rgba(41,121,255,.35);
+  --accent-dim:   rgba(41,121,255,.10);
+  --accent-glow:  rgba(41,121,255,.30);
   --visited:      #9C6DFF;
   --state-ko:     #F44336;
   --state-doubt:  #FFB300;
   --state-ok:     #00E676;
-  --border:       #1A2744;
-  --border-lit:   #2A3F6A;
-  --shadow:       0 4px 16px rgba(0,0,0,.6);
+  --border:       #0F1E36;
+  --border-lit:   #1E3258;
+  --shadow:       0 4px 20px rgba(0,0,0,.8);
   --radius:       6px;
   --font:         system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -38,7 +38,7 @@ body {
 
 /* ── Header ───────────────────────────────────────────────────────────────── */
 .app-header {
-  background: linear-gradient(135deg, #060C18 0%, #0A1628 100%);
+  background: linear-gradient(135deg, #020509 0%, #060E1C 100%);
   color: #fff;
   padding: 0 24px;
   min-height: 60px;
@@ -61,11 +61,11 @@ body {
 }
 
 .app-logo {
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 6px var(--accent-glow));
+  filter: drop-shadow(0 0 5px var(--accent-glow));
 }
 
 .header-text {
@@ -213,7 +213,7 @@ body {
 }
 
 .form-row input[type="text"] option,
-.form-row select option { background: #0C1526; color: var(--text); }
+.form-row select option { background: #060D1A; color: var(--text); }
 
 .form-row input:focus,
 .form-row select:focus {
@@ -524,7 +524,7 @@ body {
   color: var(--text);
 }
 
-.links-toolbar select option { background: #0C1526; }
+.links-toolbar select option { background: #060D1A; }
 
 /* ── Links container ──────────────────────────────────────────────────────── */
 .links-container {
@@ -611,10 +611,10 @@ body {
 
 .toast.visible { opacity: 1; transform: translateY(0); }
 
-.toast-success { background: #0A2A18; color: var(--state-ok);   border-color: var(--state-ok); }
-.toast-warn    { background: #2A1E00; color: var(--state-doubt); border-color: var(--state-doubt); }
-.toast-error   { background: #2A0A0A; color: var(--state-ko);   border-color: var(--state-ko); }
-.toast-info    { background: #0E1E38; color: var(--text);        border-color: var(--border-lit); }
+.toast-success { background: #051510; color: var(--state-ok);   border-color: var(--state-ok); }
+.toast-warn    { background: #150F00; color: var(--state-doubt); border-color: var(--state-doubt); }
+.toast-error   { background: #150505; color: var(--state-ko);   border-color: var(--state-ko); }
+.toast-info    { background: #07101E; color: var(--text);        border-color: var(--border-lit); }
 
 /* ── Responsive: ≤ 900px ──────────────────────────────────────────────────── */
 @media (max-width: 900px) {
@@ -685,7 +685,7 @@ body {
 /* ── Responsive: ≤ 480px ──────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .app-header { padding: 0 12px; min-height: 52px; }
-  .app-logo { width: 36px; height: 36px; }
+  .app-logo { width: 26px; height: 26px; }
   .app-title { font-size: 1rem; }
   .app-main { padding: 0 8px; margin: 8px auto; gap: 10px; }
   .card { padding: 12px 10px; border-radius: 4px; }
