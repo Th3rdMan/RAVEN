@@ -1,4 +1,19 @@
+/**
+ * @fileoverview Session import/export — serialises the current RAVEN session
+ * (pseudo, generated variants, link states, clicked links) to a JSON file and
+ * restores it from a previously exported file.
+ */
 const IO = (() => {
+  /**
+   * Exports the current session to a timestamped JSON file and triggers a
+   * browser download. The exported file includes:
+   * - `schemaVersion` for forward-compatibility checks on import.
+   * - `exportedAt` ISO timestamp for provenance.
+   * - `session` object containing pseudo, results, link states and clicked links.
+   *
+   * The filename follows the pattern `raven-session-<pseudo>-<YYYYMMDDTHHmmss>.json`.
+   * @returns {void}
+   */
   function exportSession() {
     const pseudo = Storage.get('pseudo', '');
     const results = Storage.get('results', null);
@@ -29,6 +44,18 @@ const IO = (() => {
     URL.revokeObjectURL(url);
   }
 
+  /**
+   * Reads a previously exported session file and restores it to Storage.
+   * The user is asked to confirm before overwriting the current session.
+   * Site configuration and leet-table selections are **not** affected by an import.
+   *
+   * @param {File}     file      - The JSON file selected by the user.
+   * @param {function({pseudo: string, results: *, link_states: Object, link_clicked: Object}): void} onSuccess
+   *   Called with the restored session object when the import succeeds.
+   * @param {function(string): void} onError
+   *   Called with a human-readable error message when the import fails.
+   * @returns {void}
+   */
   function importSession(file, onSuccess, onError) {
     const reader = new FileReader();
     reader.onload = (e) => {
