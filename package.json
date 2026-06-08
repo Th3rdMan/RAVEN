@@ -1,0 +1,11 @@
+{
+  "name": "raven",
+  "version": "1.0.0",
+  "description": "Reconnaissance of Aliases, Variants & External Networks",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "python3 -m http.server 8080"
+  },
+  "author": "Th3rD (based on nikoko107/hammer)",
+  "license": "MIT"
+}

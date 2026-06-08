@@ -421,6 +421,95 @@ body {
   color: var(--text);
 }
 
+/* ── Checker bar ──────────────────────────────────────────────────────────── */
+.checker-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #F8F8F8;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.checker-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.checker-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.proxy-badge {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.proxy-badge[data-state="offline"] { color: #B0B0B0; }
+.proxy-badge[data-state="ready"]   { color: var(--state-ok); }
+.proxy-badge[data-state="running"] { color: var(--accent); }
+.proxy-badge[data-state="done"]    { color: var(--state-ok); }
+
+.checker-info {
+  font-size: 12px;
+  color: #999;
+}
+
+.checker-info code {
+  background: #EEEEEE;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 11px;
+}
+
+/* ── Progress bar ─────────────────────────────────────────────────────────── */
+.checker-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar {
+  width: 120px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  border-radius: 3px;
+  transition: width .15s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.btn-stop {
+  background: #FFEBEE;
+  color: var(--state-ko);
+  border-color: #FFCDD2;
+}
+
+.btn-stop:hover { background: #FFCDD2; }
+
 /* ── Links toolbar ────────────────────────────────────────────────────────── */
 .links-toolbar {
   display: flex;
@@ -671,6 +760,11 @@ body {
     height: 44px;
     font-size: 18px;
   }
+
+  /* Checker bar: stack vertically */
+  .checker-bar { flex-direction: column; align-items: flex-start; }
+  .checker-right { flex-wrap: wrap; }
+  .progress-bar { width: 100px; }
 
   /* Wordlist textarea */
   #wordlist-textarea { min-height: 200px; resize: vertical; }

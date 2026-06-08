@@ -129,6 +129,21 @@
       </div>
 
       <div class="tab-pane" data-tab="links" id="pane-links" role="tabpanel">
+        <div class="checker-bar">
+          <div class="checker-left">
+            <span class="proxy-badge" id="proxy-badge" data-state="offline">⬤ Proxy inactif</span>
+            <span class="checker-info" id="checker-info">Lancez <code>node server.js</code></span>
+          </div>
+          <div class="checker-right">
+            <div class="checker-progress" id="checker-progress" style="display:none">
+              <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+              <span class="progress-text" id="progress-text">0 / 0</span>
+            </div>
+            <button id="btn-check-all" class="btn-secondary" disabled>⚡ Vérifier tout</button>
+            <button id="btn-check-stop" class="btn-secondary btn-stop" style="display:none">⬛ Arrêter</button>
+          </div>
+        </div>
+
         <div class="links-toolbar">
           <div class="filter-group">
             <label for="links-filter-cat">Catégorie :</label>
@@ -164,6 +179,7 @@
   <script src="js/generator.js"></script>
   <script src="js/sites.js"></script>
   <script src="js/io.js"></script>
+  <script src="js/checker.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

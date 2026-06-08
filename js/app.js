@@ -1,4 +1,5 @@
-let leetPairsAll = [];
+let leetPairsAll      = [];
+let checkerController = null;
 
 async function init() {
   await Sites.loadDefaults();
@@ -207,6 +208,7 @@ function renderResults() {
   section.style.display = '';
   renderWordlist(results.variants);
   renderLinks(results.variants);
+  initChecker();
 }
 
 function renderWordlist(variants) {
@@ -282,6 +284,120 @@ function switchTab(tabName) {
   document.querySelectorAll('.tab-pane').forEach(pane => {
     pane.classList.toggle('active', pane.dataset.tab === tabName);
   });
+  if (tabName === 'links') initChecker();
+}
+
+// ── Auto-checker ───────────────────────────────────────────────────────────────
+
+async function initChecker() {
+  const available = await Checker.ping();
+  setCheckerUI(available ? 'ready' : 'offline');
+}
+
+function setCheckerUI(state) {
+  const badge    = document.getElementById('proxy-badge');
+  const btnStart = document.getElementById('btn-check-all');
+  const btnStop  = document.getElementById('btn-check-stop');
+  const progress = document.getElementById('checker-progress');
+  const info     = document.getElementById('checker-info');
+  if (!badge) return;
+
+  badge.dataset.state = state;
+
+  if (state === 'offline') {
+    badge.textContent  = '⬤ Proxy inactif';
+    btnStart.disabled  = true;
+    btnStop.style.display  = 'none';
+    btnStart.style.display = '';
+    progress.style.display = 'none';
+    info.innerHTML = 'Lancez <code>node server.js</code>';
+  } else if (state === 'ready') {
+    badge.textContent  = '⬤ Proxy actif';
+    btnStart.disabled  = false;
+    btnStop.style.display  = 'none';
+    btnStart.style.display = '';
+    progress.style.display = 'none';
+    const results = Storage.get('results', null);
+    const count   = results ? results.variants.length * Sites.getSites().length : 0;
+    info.textContent = count ? `${count} liens à vérifier` : '';
+  } else if (state === 'running') {
+    badge.textContent  = '⬤ Vérification…';
+    btnStart.disabled  = true;
+    btnStart.style.display = 'none';
+    btnStop.style.display  = '';
+    progress.style.display = '';
+  } else if (state === 'done') {
+    badge.textContent  = '⬤ Proxy actif';
+    btnStart.disabled  = false;
+    btnStart.style.display = '';
+    btnStop.style.display  = 'none';
+    progress.style.display = 'none';
+    info.textContent = 'Vérification terminée';
+  }
+}
+
+function updateCheckerProgress(completed, total) {
+  const fill = document.getElementById('progress-fill');
+  const text = document.getElementById('progress-text');
+  if (!fill || !text) return;
+  fill.style.width  = (total ? Math.round((completed / total) * 100) : 0) + '%';
+  text.textContent  = `${completed} / ${total}`;
+}
+
+function updateLinkRowState(key, state) {
+  const linkStates       = Storage.get('link_states', {});
+  linkStates[key]        = state;
+  Storage.set('link_states', linkStates);
+
+  const row = document.querySelector(`.link-row[data-key="${CSS.escape(key)}"]`);
+  if (!row) return;
+  row.querySelectorAll('.btn-state').forEach(b => {
+    const s      = parseInt(b.dataset.state, 10);
+    const active = s === state;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', active);
+  });
+}
+
+async function startAutoCheck() {
+  const results = Storage.get('results', null);
+  if (!results || !results.variants.length) {
+    showToast('Aucun résultat à vérifier.', 'warn');
+    return;
+  }
+
+  const sites = Sites.getSites();
+  const links = [];
+  for (const variant of results.variants) {
+    for (const site of sites) {
+      links.push({ key: `${variant}::${site.id}`, url: Sites.buildUrl(site, variant) });
+    }
+  }
+
+  checkerController = new AbortController();
+  setCheckerUI('running');
+  updateCheckerProgress(0, links.length);
+
+  await Checker.runAll({
+    links,
+    concurrency : 3,
+    signal      : checkerController.signal,
+    onProgress  : (done, total) => updateCheckerProgress(done, total),
+    onResult    : (key, state)  => updateLinkRowState(key, state),
+  });
+
+  const aborted = checkerController.signal.aborted;
+  checkerController = null;
+  setCheckerUI(aborted ? 'ready' : 'done');
+  if (!aborted) {
+    renderLinks(results.variants);
+    showToast('Vérification terminée.', 'success');
+  }
+}
+
+function stopAutoCheck() {
+  if (checkerController) { checkerController.abort(); checkerController = null; }
+  setCheckerUI('ready');
 }
 
 // ── Event binding ──────────────────────────────────────────────────────────────
@@ -455,6 +571,10 @@ function bindEvents() {
   document.getElementById('btn-import').addEventListener('click', () => {
     document.getElementById('import-file-input').click();
   });
+
+  // Auto-checker controls
+  document.getElementById('btn-check-all').addEventListener('click', startAutoCheck);
+  document.getElementById('btn-check-stop').addEventListener('click', stopAutoCheck);
 
   document.getElementById('import-file-input').addEventListener('change', (e) => {
     const file = e.target.files[0];
