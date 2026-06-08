@@ -7,7 +7,7 @@
  */
 const Checker = (() => {
   /** @type {string} Fallback proxy when none is configured. */
-  const DEFAULT_PROXY = 'http://localhost:7472';
+  const DEFAULT_PROXY = 'https://misty-boat-74a1.contact-kevin-daniel.workers.dev';
 
   /**
    * Returns the active proxy base URL (from Storage or the default).
