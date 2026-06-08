@@ -7,7 +7,7 @@ const IO = (() => {
 
     const now = new Date();
     const ts = now.toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15);
-    const filename = `osint-session-${pseudo || 'unknown'}-${ts}.json`;
+    const filename = `raven-session-${pseudo || 'unknown'}-${ts}.json`;
 
     const data = {
       schemaVersion: 1,

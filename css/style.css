@@ -30,7 +30,7 @@ body {
   background: var(--accent);
   color: #fff;
   padding: 0 24px;
-  height: 56px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -38,18 +38,54 @@ body {
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 4px rgba(0,0,0,.2);
+  gap: 12px;
+}
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
 }
 
 .app-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: .02em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1.2;
+}
+
+.app-subtitle {
+  font-size: 11px;
+  opacity: .75;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.app-footer {
+  text-align: center;
+  padding: 16px 20px;
+  font-size: 12px;
+  color: #999;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.app-footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.app-footer a:hover { text-decoration: underline; }
 
 .btn-header {
   background: rgba(255,255,255,.15);

@@ -1,5 +1,5 @@
 const Storage = (() => {
-  const PREFIX = 'osint_pg_';
+  const PREFIX = 'raven_';
 
   function key(name) {
     return PREFIX + name;
