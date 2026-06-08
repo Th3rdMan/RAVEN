@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSINT Pseudo Generator</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <h1 class="app-title">OSINT Pseudo Generator</h1>
+    <div class="header-actions">
+      <button id="btn-reset" class="btn-header" title="Réinitialiser" aria-label="Réinitialiser">
+        <span class="btn-icon-symbol" aria-hidden="true">↺</span>
+        <span class="btn-label">Reset</span>
+      </button>
+      <button id="btn-export" class="btn-header" title="Exporter la session" aria-label="Exporter">
+        <span class="btn-icon-symbol" aria-hidden="true">⬇</span>
+        <span class="btn-label">Export</span>
+      </button>
+      <button id="btn-import" class="btn-header" title="Importer une session" aria-label="Importer">
+        <span class="btn-icon-symbol" aria-hidden="true">⬆</span>
+        <span class="btn-label">Import</span>
+      </button>
+      <input type="file" id="import-file-input" accept=".json" style="display:none">
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- Section 1: Pseudo -->
+    <section class="card" aria-labelledby="pseudo-heading">
+      <h2 id="pseudo-heading">Pseudo</h2>
+      <div class="form-row">
+        <label for="pseudo-input">Pseudo à analyser</label>
+        <input type="text" id="pseudo-input" placeholder="ex: hacker42" autocomplete="off" spellcheck="false">
+      </div>
+    </section>
+
+    <!-- Section 2: Leet table -->
+    <section class="card collapsible collapsed" aria-labelledby="leet-heading">
+      <h2 id="leet-heading">
+        Table leet
+        <button class="btn-collapse" aria-expanded="false" aria-label="Développer la table leet" title="Développer / Réduire">▶</button>
+      </h2>
+      <div class="card-body">
+        <div class="table-wrapper">
+          <table class="leet-table" aria-label="Paires de substitution leet">
+            <thead>
+              <tr>
+                <th scope="col">✓</th>
+                <th scope="col">De</th>
+                <th scope="col"></th>
+                <th scope="col">Vers</th>
+                <th scope="col">Catégorie</th>
+              </tr>
+            </thead>
+            <tbody id="leet-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Hamming distance -->
+    <section class="card" aria-labelledby="distance-heading">
+      <h2 id="distance-heading">Distance de Hamming</h2>
+      <div class="form-row">
+        <label for="distance-select">Distance maximale</label>
+        <select id="distance-select">
+          <option value="1">1 — substitution simple</option>
+          <option value="2">2 — deux substitutions</option>
+          <option value="3">3 — trois substitutions</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Section 4: Sites -->
+    <section class="card collapsible collapsed" aria-labelledby="sites-heading">
+      <h2 id="sites-heading">
+        Sites à tester
+        <button class="btn-collapse" aria-expanded="false" aria-label="Développer la liste des sites" title="Développer / Réduire">▶</button>
+      </h2>
+      <div class="card-body">
+        <div class="table-wrapper">
+          <table class="sites-table" aria-label="Liste des sites">
+            <thead>
+              <tr>
+                <th scope="col">Nom</th>
+                <th scope="col">URL template</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody id="sites-tbody">
+            </tbody>
+          </table>
+        </div>
+        <div class="add-site-row">
+          <input type="text" id="new-site-name" placeholder="Nom du site" aria-label="Nom du nouveau site">
+          <input type="text" id="new-site-url" placeholder="https://example.com/{pseudo}" aria-label="URL du nouveau site (doit contenir {pseudo})">
+          <button id="btn-add-site" class="btn-primary">+ Ajouter</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Generate -->
+    <section class="card generate-section">
+      <button id="btn-generate" class="btn-generate">Générer les variantes</button>
+    </section>
+
+    <!-- Section 6: Results -->
+    <section class="card" id="results-section" style="display:none" aria-labelledby="results-heading">
+      <h2 id="results-heading">Résultats</h2>
+
+      <div class="tabs" role="tablist" aria-label="Onglets résultats">
+        <button class="tab-btn active" data-tab="wordlist" role="tab" aria-selected="true" aria-controls="pane-wordlist">Wordlist</button>
+        <button class="tab-btn" data-tab="links" role="tab" aria-selected="false" aria-controls="pane-links">Liens</button>
+      </div>
+
+      <div class="tab-pane active" data-tab="wordlist" id="pane-wordlist" role="tabpanel">
+        <div class="wordlist-actions">
+          <button id="btn-copy" class="btn-secondary">Copier</button>
+        </div>
+        <textarea id="wordlist-textarea" readonly aria-label="Wordlist des variantes générées"></textarea>
+      </div>
+
+      <div class="tab-pane" data-tab="links" id="pane-links" role="tabpanel">
+        <div class="links-toolbar">
+          <div class="filter-group">
+            <label for="links-filter-cat">Catégorie :</label>
+            <select id="links-filter-cat" aria-label="Filtrer les liens par catégorie">
+              <option value="all">Toutes</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="links-filter">État :</label>
+            <select id="links-filter" aria-label="Filtrer les liens par état">
+              <option value="all">Tous</option>
+              <option value="unverified">Non vérifiés</option>
+              <option value="0">🔴 Ne fonctionne pas</option>
+              <option value="1">🟡 Doute</option>
+              <option value="2">🟢 Correspond</option>
+            </select>
+          </div>
+        </div>
+        <div id="links-container" class="links-container" aria-live="polite">
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/generator.js"></script>
+  <script src="js/sites.js"></script>
+  <script src="js/io.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+[
+  { "id": "a-4", "from": "a", "to": "4", "default": true,  "category": "digit" },
+  { "id": "e-3", "from": "e", "to": "3", "default": true,  "category": "digit" },
+  { "id": "i-1", "from": "i", "to": "1", "default": true,  "category": "digit" },
+  { "id": "o-0", "from": "o", "to": "0", "default": true,  "category": "digit" },
+  { "id": "s-5", "from": "s", "to": "5", "default": true,  "category": "digit" },
+  { "id": "t-7", "from": "t", "to": "7", "default": true,  "category": "digit" },
+  { "id": "b-8", "from": "b", "to": "8", "default": true,  "category": "digit" },
+  { "id": "g-9", "from": "g", "to": "9", "default": true,  "category": "digit" },
+  { "id": "l-1", "from": "l", "to": "1", "default": true,  "category": "digit" },
+  { "id": "a-@", "from": "a", "to": "@", "default": false, "category": "special" },
+  { "id": "i-!", "from": "i", "to": "!", "default": false, "category": "special" },
+  { "id": "s-$", "from": "s", "to": "$", "default": false, "category": "special" }
+]
