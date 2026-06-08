@@ -61,8 +61,8 @@ body {
 }
 
 .app-logo {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   flex-shrink: 0;
   filter: drop-shadow(0 0 5px var(--accent-glow));
@@ -685,7 +685,7 @@ body {
 /* ── Responsive: ≤ 480px ──────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .app-header { padding: 0 12px; min-height: 52px; }
-  .app-logo { width: 26px; height: 26px; }
+  .app-logo { width: 30px; height: 30px; }
   .app-title { font-size: 1rem; }
   .app-main { padding: 0 8px; margin: 8px auto; gap: 10px; }
   .card { padding: 12px 10px; border-radius: 4px; }

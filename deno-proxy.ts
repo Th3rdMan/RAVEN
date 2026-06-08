@@ -23,9 +23,9 @@ const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 
 async function probe(url: string): Promise<number> {
   try {
-    let res = await fetch(url, { method: 'HEAD', redirect: 'follow', headers: { 'User-Agent': UA } });
+    let res = await fetch(url, { method: 'HEAD', redirect: 'manual', headers: { 'User-Agent': UA } });
     if (res.status === 405) {
-      res = await fetch(url, { method: 'GET', redirect: 'follow', headers: { 'User-Agent': UA } });
+      res = await fetch(url, { method: 'GET', redirect: 'manual', headers: { 'User-Agent': UA } });
     }
     return res.status;
   } catch {

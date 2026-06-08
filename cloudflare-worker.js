@@ -29,13 +29,13 @@ async function probe(targetUrl) {
   try {
     let res = await fetch(targetUrl, {
       method  : 'HEAD',
-      redirect: 'follow',
+      redirect: 'manual',
       headers : { 'User-Agent': UA },
     });
     if (res.status === 405) {
       res = await fetch(targetUrl, {
         method  : 'GET',
-        redirect: 'follow',
+        redirect: 'manual',
         headers : { 'User-Agent': UA },
       });
     }
