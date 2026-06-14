@@ -1,6 +1,10 @@
 let leetPairsAll      = [];
 let checkerController = null;
 
+function isDirectMode() {
+  return isDirectMode() ?? false;
+}
+
 async function init() {
   await Sites.loadDefaults();
 
@@ -217,7 +221,7 @@ function generate() {
     return;
   }
 
-  const directMode = document.getElementById('direct-mode').checked;
+  const directMode = isDirectMode();
 
   if (directMode) {
     saveAndRenderResults(pseudo, [pseudo]);
@@ -316,8 +320,7 @@ function saveAndRenderResults(pseudo, variants) {
   Storage.set('results', resultsData);
   showToast(`${variants.length} variante(s) générée(s).`, 'success');
   renderResults();
-  // En mode direct, basculer directement sur l'onglet Liens
-  if (document.getElementById('direct-mode').checked) switchTab('links');
+  if (isDirectMode()) switchTab('links');
   document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -464,7 +467,7 @@ function setCheckerUI(state) {
 }
 
 function updateCheckerProgress(completed, total) {
-  const directMode = document.getElementById('direct-mode')?.checked;
+  const directMode = isDirectMode();
   const fillId = directMode ? 'direct-progress-fill' : 'progress-fill';
   const textId = directMode ? 'direct-progress-text' : 'progress-text';
   const fill = document.getElementById(fillId);
@@ -478,7 +481,7 @@ function setDirectCheckUI(state) {
   const btn      = document.getElementById('btn-direct-check');
   const btnStop  = document.getElementById('btn-direct-stop');
   const progress = document.getElementById('direct-progress');
-  if (!btn) return;
+  if (!btn || !btnStop || !progress) return;
   if (state === 'running') {
     btn.style.display      = 'none';
     btnStop.style.display  = '';
@@ -513,7 +516,7 @@ async function startAutoCheck() {
     return;
   }
 
-  const directMode = document.getElementById('direct-mode')?.checked;
+  const directMode = isDirectMode();
   const sites = getActiveSites();
   const links = [];
   for (const variant of results.variants) {
@@ -785,7 +788,7 @@ function bindEvents() {
   document.getElementById('btn-direct-check').addEventListener('click', startAutoCheck);
   document.getElementById('btn-direct-stop').addEventListener('click', () => {
     if (checkerController) { checkerController.abort(); checkerController = null; }
-    setDirectCheckUI('idle');
+    setDirectCheckUI('idle');  // remet le gros bouton, identique à stopAutoCheck pour le mode standard
   });
 
   document.getElementById('import-file-input').addEventListener('change', (e) => {
