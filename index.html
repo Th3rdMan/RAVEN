@@ -42,6 +42,10 @@
         <label for="pseudo-input">Pseudo à analyser</label>
         <input type="text" id="pseudo-input" placeholder="ex: hacker42" autocomplete="off" spellcheck="false">
       </div>
+      <div class="direct-mode-row">
+        <input type="checkbox" id="direct-mode" aria-label="Recherche directe sans substitution leet">
+        <label for="direct-mode">Recherche directe — pseudo exact uniquement, sans variantes leet</label>
+      </div>
     </section>
 
     <!-- Section 2: Leet table -->
@@ -89,10 +93,12 @@
         <button class="btn-collapse" aria-expanded="false" aria-label="Développer la liste des sites" title="Développer / Réduire">▶</button>
       </h2>
       <div class="card-body">
+        <div id="cat-filter-bar" class="cat-filter-bar"></div>
         <div class="table-wrapper">
           <table class="sites-table" aria-label="Liste des sites">
             <thead>
               <tr>
+                <th scope="col" class="col-check">✓</th>
                 <th scope="col">Nom</th>
                 <th scope="col">URL template</th>
                 <th scope="col"></th>

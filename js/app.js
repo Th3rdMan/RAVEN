@@ -27,6 +27,9 @@ function restoreState() {
 
   const distance = Storage.get('distance', 1);
   document.getElementById('distance-select').value = distance;
+
+  const directMode = Storage.get('direct_mode', false);
+  document.getElementById('direct-mode').checked = directMode;
 }
 
 // ── Leet table ─────────────────────────────────────────────────────────────────
@@ -71,21 +74,129 @@ function getSelectedLeetPairs() {
   return leetPairsAll.filter(p => selected.includes(p.id));
 }
 
+// ── Active sites ───────────────────────────────────────────────────────────────
+
+function getActiveSites() {
+  const disabled = Storage.get('sites_disabled', []);
+  return Sites.getSites().filter(s => !disabled.includes(s.id));
+}
+
+// ── Category filter ────────────────────────────────────────────────────────────
+
+function renderCategoryFilter(sites, disabled) {
+  const bar = document.getElementById('cat-filter-bar');
+  if (!bar) return;
+
+  const allCats      = [...new Set(sites.filter(s => s.cat).map(s => s.cat))].sort();
+  const totalCount   = sites.length;
+  const enabledCount = sites.filter(s => !disabled.includes(s.id)).length;
+
+  bar.textContent = '';
+
+  const labelSpan = document.createElement('span');
+  labelSpan.className = 'cat-filter-label';
+  labelSpan.textContent = 'Catégories :';
+  bar.appendChild(labelSpan);
+
+  function makeCatItem(catValue, text) {
+    const lbl = document.createElement('label');
+    lbl.className = 'cat-filter-item';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'cat-cb';
+    cb.dataset.cat = catValue;
+    lbl.appendChild(cb);
+    lbl.appendChild(document.createTextNode(' ' + text));
+    return { lbl, cb };
+  }
+
+  const { lbl: allLbl, cb: allCb } = makeCatItem('all', `Tout (${enabledCount}/${totalCount})`);
+  allCb.checked       = enabledCount === totalCount;
+  allCb.indeterminate = enabledCount > 0 && enabledCount < totalCount;
+  bar.appendChild(allLbl);
+
+  for (const cat of allCats) {
+    const catSites   = sites.filter(s => s.cat === cat);
+    const catEnabled = catSites.filter(s => !disabled.includes(s.id)).length;
+    const { lbl, cb } = makeCatItem(cat, `${cat} (${catEnabled}/${catSites.length})`);
+    cb.checked       = catEnabled === catSites.length;
+    cb.indeterminate = catEnabled > 0 && catEnabled < catSites.length;
+    bar.appendChild(lbl);
+  }
+}
+
 // ── Sites editor ───────────────────────────────────────────────────────────────
 
 function renderSitesEditor() {
-  const sites = Sites.getSites();
-  const tbody = document.getElementById('sites-tbody');
+  const sites    = Sites.getSites();
+  const disabled = Storage.get('sites_disabled', []);
+  const tbody    = document.getElementById('sites-tbody');
   tbody.innerHTML = '';
 
+  renderCategoryFilter(sites, disabled);
+
   for (const site of sites) {
+    const isEnabled = !disabled.includes(site.id);
+    const isCustom  = site.id.startsWith('site_');
     const tr = document.createElement('tr');
     tr.dataset.id = site.id;
-    tr.innerHTML = `
-      <td>${escHtml(site.name)}${site.cat ? `<span class="site-cat">${escHtml(site.cat)}</span>` : ''}</td>
-      <td class="url-cell"><span title="${escHtml(site.url)}">${escHtml(site.url)}</span>${site.strip_bad_char ? `<span class="strip-badge" title="Caractères ignorés par ce site">strip: <code>${escHtml(site.strip_bad_char)}</code></span>` : ''}</td>
-      <td><button class="btn-icon btn-delete-site" data-id="${site.id}" aria-label="Supprimer ${escHtml(site.name)}" title="Supprimer">🗑</button></td>
-    `;
+    if (!isEnabled) tr.classList.add('site-disabled');
+
+    // Col 1 — enable/disable checkbox
+    const tdCheck = document.createElement('td');
+    tdCheck.className = 'col-check';
+    const enableCb = document.createElement('input');
+    enableCb.type = 'checkbox';
+    enableCb.className = 'site-enable-cb';
+    enableCb.dataset.id = site.id;
+    enableCb.checked = isEnabled;
+    enableCb.setAttribute('aria-label', (isEnabled ? 'Désactiver ' : 'Activer ') + site.name);
+    tdCheck.appendChild(enableCb);
+    tr.appendChild(tdCheck);
+
+    // Col 2 — name + category badge
+    const tdName = document.createElement('td');
+    tdName.textContent = site.name;
+    if (site.cat) {
+      const catSpan = document.createElement('span');
+      catSpan.className = 'site-cat';
+      catSpan.textContent = site.cat;
+      tdName.appendChild(catSpan);
+    }
+    tr.appendChild(tdName);
+
+    // Col 3 — URL template
+    const tdUrl = document.createElement('td');
+    tdUrl.className = 'url-cell';
+    const urlSpan = document.createElement('span');
+    urlSpan.title = site.url;
+    urlSpan.textContent = site.url;
+    tdUrl.appendChild(urlSpan);
+    if (site.strip_bad_char) {
+      const stripSpan = document.createElement('span');
+      stripSpan.className = 'strip-badge';
+      stripSpan.title = 'Caractères ignorés par ce site';
+      stripSpan.textContent = 'strip: ';
+      const code = document.createElement('code');
+      code.textContent = site.strip_bad_char;
+      stripSpan.appendChild(code);
+      tdUrl.appendChild(stripSpan);
+    }
+    tr.appendChild(tdUrl);
+
+    // Col 4 — delete button (custom sites only)
+    const tdAction = document.createElement('td');
+    if (isCustom) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-icon btn-delete-site';
+      delBtn.dataset.id = site.id;
+      delBtn.setAttribute('aria-label', 'Supprimer ' + site.name);
+      delBtn.title = 'Supprimer';
+      delBtn.textContent = '🗑';
+      tdAction.appendChild(delBtn);
+    }
+    tr.appendChild(tdAction);
+
     tbody.appendChild(tr);
   }
 }
@@ -96,6 +207,13 @@ function generate() {
   const pseudo = document.getElementById('pseudo-input').value.trim();
   if (!pseudo) {
     showToast('Veuillez saisir un pseudo.', 'warn');
+    return;
+  }
+
+  const directMode = document.getElementById('direct-mode').checked;
+
+  if (directMode) {
+    saveAndRenderResults(pseudo, [pseudo]);
     return;
   }
 
@@ -224,10 +342,10 @@ function populateCategoryFilter(sites) {
 }
 
 function renderLinks(variants) {
-  const sites = Sites.getSites();
+  const sites      = getActiveSites();
   const linkStates = Storage.get('link_states', {});
   const linkClicked = Storage.get('link_clicked', {});
-  const container = document.getElementById('links-container');
+  const container  = document.getElementById('links-container');
   container.innerHTML = '';
 
   populateCategoryFilter(sites);
@@ -238,7 +356,7 @@ function renderLinks(variants) {
   for (const variant of variants) {
     for (const site of sites) {
       const compositeKey = `${variant}::${site.id}`;
-      const state = linkStates[compositeKey] ?? null;
+      const state   = linkStates[compositeKey] ?? null;
       const clicked = linkClicked[compositeKey] ?? false;
 
       if (filterCat !== 'all' && (site.cat || '') !== filterCat) continue;
@@ -318,7 +436,7 @@ function setCheckerUI(state) {
     btnStart.style.display  = '';
     progress.style.display  = 'none';
     const results = Storage.get('results', null);
-    const count   = results ? results.variants.length * Sites.getSites().length : 0;
+    const count   = results ? results.variants.length * getActiveSites().length : 0;
     info.textContent = count ? `${count} liens à vérifier` : '';
   } else if (state === 'running') {
     badge.textContent       = '⬤ Vérification…';
@@ -366,7 +484,7 @@ async function startAutoCheck() {
     return;
   }
 
-  const sites = Sites.getSites();
+  const sites = getActiveSites();
   const links = [];
   for (const variant of results.variants) {
     for (const site of sites) {
@@ -434,6 +552,11 @@ function bindEvents() {
     Storage.set('distance', parseInt(e.target.value, 10));
   });
 
+  // Direct mode checkbox
+  document.getElementById('direct-mode').addEventListener('change', (e) => {
+    Storage.set('direct_mode', e.target.checked);
+  });
+
   // Leet checkboxes (delegated)
   document.getElementById('leet-tbody').addEventListener('change', (e) => {
     if (e.target.type === 'checkbox') {
@@ -448,13 +571,55 @@ function bindEvents() {
     }
   });
 
-  // Sites editor — delete (delegated)
+  // Sites editor — site enable/disable checkbox (delegated, change event)
+  document.getElementById('sites-tbody').addEventListener('change', (e) => {
+    const cb = e.target.closest('.site-enable-cb');
+    if (!cb) return;
+    const id = cb.dataset.id;
+    let disabled = Storage.get('sites_disabled', []);
+    if (cb.checked) {
+      disabled = disabled.filter(d => d !== id);
+    } else {
+      if (!disabled.includes(id)) disabled.push(id);
+    }
+    Storage.set('sites_disabled', disabled);
+    const tr = cb.closest('tr');
+    if (tr) tr.classList.toggle('site-disabled', !cb.checked);
+    renderCategoryFilter(Sites.getSites(), disabled);
+  });
+
+  // Sites editor — delete custom site (delegated, click event)
   document.getElementById('sites-tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-delete-site');
     if (btn) {
       Sites.removeSite(btn.dataset.id);
       renderSitesEditor();
     }
+  });
+
+  // Category filter checkboxes (delegated)
+  document.getElementById('cat-filter-bar').addEventListener('change', (e) => {
+    const cb = e.target.closest('.cat-cb');
+    if (!cb) return;
+    const cat   = cb.dataset.cat;
+    const sites = Sites.getSites();
+    let disabled = Storage.get('sites_disabled', []);
+
+    if (cat === 'all') {
+      disabled = cb.checked ? [] : sites.map(s => s.id);
+    } else {
+      const catIds = sites.filter(s => s.cat === cat).map(s => s.id);
+      if (cb.checked) {
+        disabled = disabled.filter(id => !catIds.includes(id));
+      } else {
+        for (const id of catIds) {
+          if (!disabled.includes(id)) disabled.push(id);
+        }
+      }
+    }
+
+    Storage.set('sites_disabled', disabled);
+    renderSitesEditor();
   });
 
   // Add site button
