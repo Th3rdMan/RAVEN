@@ -138,6 +138,16 @@
       </div>
 
       <div class="tab-pane" data-tab="links" id="pane-links" role="tabpanel">
+        <!-- Bouton direct mode (remplace checker-bar) -->
+        <div class="direct-check-bar">
+          <button id="btn-direct-check" class="btn-generate">Lancer la recherche</button>
+          <div class="checker-progress direct-progress" id="direct-progress" style="display:none">
+            <div class="progress-bar"><div class="progress-fill" id="direct-progress-fill"></div></div>
+            <span class="progress-text" id="direct-progress-text">0 / 0</span>
+          </div>
+          <button id="btn-direct-stop" class="btn-secondary btn-stop" style="display:none">⬛ Arrêter</button>
+        </div>
+
         <div class="checker-bar">
           <div class="checker-left">
             <span class="proxy-badge" id="proxy-badge" data-state="offline">⬤ Proxy</span>

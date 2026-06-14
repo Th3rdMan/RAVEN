@@ -316,6 +316,8 @@ function saveAndRenderResults(pseudo, variants) {
   Storage.set('results', resultsData);
   showToast(`${variants.length} variante(s) générée(s).`, 'success');
   renderResults();
+  // En mode direct, basculer directement sur l'onglet Liens
+  if (document.getElementById('direct-mode').checked) switchTab('links');
   document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -462,11 +464,31 @@ function setCheckerUI(state) {
 }
 
 function updateCheckerProgress(completed, total) {
-  const fill = document.getElementById('progress-fill');
-  const text = document.getElementById('progress-text');
+  const directMode = document.getElementById('direct-mode')?.checked;
+  const fillId = directMode ? 'direct-progress-fill' : 'progress-fill';
+  const textId = directMode ? 'direct-progress-text' : 'progress-text';
+  const fill = document.getElementById(fillId);
+  const text = document.getElementById(textId);
   if (!fill || !text) return;
-  fill.style.width  = (total ? Math.round((completed / total) * 100) : 0) + '%';
-  text.textContent  = `${completed} / ${total}`;
+  fill.style.width = (total ? Math.round((completed / total) * 100) : 0) + '%';
+  text.textContent = `${completed} / ${total}`;
+}
+
+function setDirectCheckUI(state) {
+  const btn      = document.getElementById('btn-direct-check');
+  const btnStop  = document.getElementById('btn-direct-stop');
+  const progress = document.getElementById('direct-progress');
+  if (!btn) return;
+  if (state === 'running') {
+    btn.style.display      = 'none';
+    btnStop.style.display  = '';
+    progress.style.display = '';
+  } else {
+    btn.style.display      = '';
+    btnStop.style.display  = 'none';
+    progress.style.display = 'none';
+    if (state === 'done') showToast('Vérification terminée.', 'success');
+  }
 }
 
 function updateLinkRowState(key, state) {
@@ -491,6 +513,7 @@ async function startAutoCheck() {
     return;
   }
 
+  const directMode = document.getElementById('direct-mode')?.checked;
   const sites = getActiveSites();
   const links = [];
   for (const variant of results.variants) {
@@ -500,7 +523,11 @@ async function startAutoCheck() {
   }
 
   checkerController = new AbortController();
-  setCheckerUI('running');
+  if (directMode) {
+    setDirectCheckUI('running');
+  } else {
+    setCheckerUI('running');
+  }
   updateCheckerProgress(0, links.length);
 
   await Checker.runAll({
@@ -513,10 +540,15 @@ async function startAutoCheck() {
 
   const aborted = checkerController.signal.aborted;
   checkerController = null;
-  setCheckerUI(aborted ? 'ready' : 'done');
-  if (!aborted) {
-    renderLinks(results.variants);
-    showToast('Vérification terminée.', 'success');
+  if (directMode) {
+    setDirectCheckUI(aborted ? 'idle' : 'done');
+    if (!aborted) renderLinks(results.variants);
+  } else {
+    setCheckerUI(aborted ? 'ready' : 'done');
+    if (!aborted) {
+      renderLinks(results.variants);
+      showToast('Vérification terminée.', 'success');
+    }
   }
 }
 
@@ -745,9 +777,16 @@ function bindEvents() {
     document.getElementById('import-file-input').click();
   });
 
-  // Auto-checker controls
+  // Auto-checker controls (mode standard)
   document.getElementById('btn-check-all').addEventListener('click', startAutoCheck);
   document.getElementById('btn-check-stop').addEventListener('click', stopAutoCheck);
+
+  // Auto-checker controls (mode direct)
+  document.getElementById('btn-direct-check').addEventListener('click', startAutoCheck);
+  document.getElementById('btn-direct-stop').addEventListener('click', () => {
+    if (checkerController) { checkerController.abort(); checkerController = null; }
+    setDirectCheckUI('idle');
+  });
 
   document.getElementById('import-file-input').addEventListener('change', (e) => {
     const file = e.target.files[0];
