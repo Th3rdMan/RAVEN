@@ -27,6 +27,9 @@ function restoreState() {
 
   const distance = Storage.get('distance', 1);
   document.getElementById('distance-select').value = distance;
+
+  const directMode = Storage.get('direct_mode', false);
+  document.getElementById('direct-mode').checked = directMode;
 }
 
 // ── Leet table ─────────────────────────────────────────────────────────────────
@@ -71,20 +74,77 @@ function getSelectedLeetPairs() {
   return leetPairsAll.filter(p => selected.includes(p.id));
 }
 
+// ── Active sites ───────────────────────────────────────────────────────────────
+
+function getActiveSites() {
+  const disabled = Storage.get('sites_disabled', []);
+  return Sites.getSites().filter(s => !disabled.includes(s.id));
+}
+
+// ── Category filter ────────────────────────────────────────────────────────────
+
+function renderCategoryFilter(sites, disabled) {
+  const bar = document.getElementById('cat-filter-bar');
+  if (!bar) return;
+
+  const allCats = [...new Set(sites.filter(s => s.cat).map(s => s.cat))].sort();
+  const totalCount = sites.length;
+  const enabledCount = sites.filter(s => !disabled.includes(s.id)).length;
+
+  bar.innerHTML = `
+    <span class="cat-filter-label">Catégories :</span>
+    <label class="cat-filter-item">
+      <input type="checkbox" class="cat-cb" data-cat="all">
+      Tout (${enabledCount}/${totalCount})
+    </label>
+    ${allCats.map(cat => {
+      const catSites = sites.filter(s => s.cat === cat);
+      const catEnabled = catSites.filter(s => !disabled.includes(s.id)).length;
+      return `<label class="cat-filter-item">
+        <input type="checkbox" class="cat-cb" data-cat="${escHtml(cat)}">
+        ${escHtml(cat)} (${catEnabled}/${catSites.length})
+      </label>`;
+    }).join('')}
+  `;
+
+  // Set checked / indeterminate states after render
+  const allCb = bar.querySelector('[data-cat="all"]');
+  if (allCb) {
+    allCb.checked       = enabledCount === totalCount;
+    allCb.indeterminate = enabledCount > 0 && enabledCount < totalCount;
+  }
+
+  for (const cat of allCats) {
+    const cb = bar.querySelector(`.cat-cb[data-cat="${CSS.escape(cat)}"]`);
+    if (!cb) continue;
+    const catSites    = sites.filter(s => s.cat === cat);
+    const catEnabled  = catSites.filter(s => !disabled.includes(s.id)).length;
+    cb.checked        = catEnabled === catSites.length;
+    cb.indeterminate  = catEnabled > 0 && catEnabled < catSites.length;
+  }
+}
+
 // ── Sites editor ───────────────────────────────────────────────────────────────
 
 function renderSitesEditor() {
-  const sites = Sites.getSites();
-  const tbody = document.getElementById('sites-tbody');
+  const sites    = Sites.getSites();
+  const disabled = Storage.get('sites_disabled', []);
+  const tbody    = document.getElementById('sites-tbody');
   tbody.innerHTML = '';
 
+  renderCategoryFilter(sites, disabled);
+
   for (const site of sites) {
+    const isEnabled = !disabled.includes(site.id);
+    const isCustom  = site.id.startsWith('site_');
     const tr = document.createElement('tr');
     tr.dataset.id = site.id;
+    if (!isEnabled) tr.classList.add('site-disabled');
     tr.innerHTML = `
+      <td class="col-check"><input type="checkbox" class="site-enable-cb" data-id="${escHtml(site.id)}" ${isEnabled ? 'checked' : ''} aria-label="${isEnabled ? 'Désactiver' : 'Activer'} ${escHtml(site.name)}"></td>
       <td>${escHtml(site.name)}${site.cat ? `<span class="site-cat">${escHtml(site.cat)}</span>` : ''}</td>
       <td class="url-cell"><span title="${escHtml(site.url)}">${escHtml(site.url)}</span>${site.strip_bad_char ? `<span class="strip-badge" title="Caractères ignorés par ce site">strip: <code>${escHtml(site.strip_bad_char)}</code></span>` : ''}</td>
-      <td><button class="btn-icon btn-delete-site" data-id="${site.id}" aria-label="Supprimer ${escHtml(site.name)}" title="Supprimer">🗑</button></td>
+      <td>${isCustom ? `<button class="btn-icon btn-delete-site" data-id="${escHtml(site.id)}" aria-label="Supprimer ${escHtml(site.name)}" title="Supprimer">🗑</button>` : ''}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -96,6 +156,13 @@ function generate() {
   const pseudo = document.getElementById('pseudo-input').value.trim();
   if (!pseudo) {
     showToast('Veuillez saisir un pseudo.', 'warn');
+    return;
+  }
+
+  const directMode = document.getElementById('direct-mode').checked;
+
+  if (directMode) {
+    saveAndRenderResults(pseudo, [pseudo]);
     return;
   }
 
@@ -224,10 +291,10 @@ function populateCategoryFilter(sites) {
 }
 
 function renderLinks(variants) {
-  const sites = Sites.getSites();
+  const sites      = getActiveSites();
   const linkStates = Storage.get('link_states', {});
   const linkClicked = Storage.get('link_clicked', {});
-  const container = document.getElementById('links-container');
+  const container  = document.getElementById('links-container');
   container.innerHTML = '';
 
   populateCategoryFilter(sites);
@@ -238,7 +305,7 @@ function renderLinks(variants) {
   for (const variant of variants) {
     for (const site of sites) {
       const compositeKey = `${variant}::${site.id}`;
-      const state = linkStates[compositeKey] ?? null;
+      const state   = linkStates[compositeKey] ?? null;
       const clicked = linkClicked[compositeKey] ?? false;
 
       if (filterCat !== 'all' && (site.cat || '') !== filterCat) continue;
@@ -318,7 +385,7 @@ function setCheckerUI(state) {
     btnStart.style.display  = '';
     progress.style.display  = 'none';
     const results = Storage.get('results', null);
-    const count   = results ? results.variants.length * Sites.getSites().length : 0;
+    const count   = results ? results.variants.length * getActiveSites().length : 0;
     info.textContent = count ? `${count} liens à vérifier` : '';
   } else if (state === 'running') {
     badge.textContent       = '⬤ Vérification…';
@@ -366,7 +433,7 @@ async function startAutoCheck() {
     return;
   }
 
-  const sites = Sites.getSites();
+  const sites = getActiveSites();
   const links = [];
   for (const variant of results.variants) {
     for (const site of sites) {
@@ -434,6 +501,11 @@ function bindEvents() {
     Storage.set('distance', parseInt(e.target.value, 10));
   });
 
+  // Direct mode checkbox
+  document.getElementById('direct-mode').addEventListener('change', (e) => {
+    Storage.set('direct_mode', e.target.checked);
+  });
+
   // Leet checkboxes (delegated)
   document.getElementById('leet-tbody').addEventListener('change', (e) => {
     if (e.target.type === 'checkbox') {
@@ -448,13 +520,55 @@ function bindEvents() {
     }
   });
 
-  // Sites editor — delete (delegated)
+  // Sites editor — site enable/disable checkbox (delegated, change event)
+  document.getElementById('sites-tbody').addEventListener('change', (e) => {
+    const cb = e.target.closest('.site-enable-cb');
+    if (!cb) return;
+    const id = cb.dataset.id;
+    let disabled = Storage.get('sites_disabled', []);
+    if (cb.checked) {
+      disabled = disabled.filter(d => d !== id);
+    } else {
+      if (!disabled.includes(id)) disabled.push(id);
+    }
+    Storage.set('sites_disabled', disabled);
+    const tr = cb.closest('tr');
+    if (tr) tr.classList.toggle('site-disabled', !cb.checked);
+    renderCategoryFilter(Sites.getSites(), disabled);
+  });
+
+  // Sites editor — delete custom site (delegated, click event)
   document.getElementById('sites-tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-delete-site');
     if (btn) {
       Sites.removeSite(btn.dataset.id);
       renderSitesEditor();
     }
+  });
+
+  // Category filter checkboxes (delegated)
+  document.getElementById('cat-filter-bar').addEventListener('change', (e) => {
+    const cb = e.target.closest('.cat-cb');
+    if (!cb) return;
+    const cat   = cb.dataset.cat;
+    const sites = Sites.getSites();
+    let disabled = Storage.get('sites_disabled', []);
+
+    if (cat === 'all') {
+      disabled = cb.checked ? [] : sites.map(s => s.id);
+    } else {
+      const catIds = sites.filter(s => s.cat === cat).map(s => s.id);
+      if (cb.checked) {
+        disabled = disabled.filter(id => !catIds.includes(id));
+      } else {
+        for (const id of catIds) {
+          if (!disabled.includes(id)) disabled.push(id);
+        }
+      }
+    }
+
+    Storage.set('sites_disabled', disabled);
+    renderSitesEditor();
   });
 
   // Add site button
