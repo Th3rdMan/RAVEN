@@ -225,6 +225,7 @@ function generate() {
 
   if (directMode) {
     saveAndRenderResults(pseudo, [pseudo]);
+    startAutoCheck();
     return;
   }
 
