@@ -87,40 +87,41 @@ function renderCategoryFilter(sites, disabled) {
   const bar = document.getElementById('cat-filter-bar');
   if (!bar) return;
 
-  const allCats = [...new Set(sites.filter(s => s.cat).map(s => s.cat))].sort();
-  const totalCount = sites.length;
+  const allCats      = [...new Set(sites.filter(s => s.cat).map(s => s.cat))].sort();
+  const totalCount   = sites.length;
   const enabledCount = sites.filter(s => !disabled.includes(s.id)).length;
 
-  bar.innerHTML = `
-    <span class="cat-filter-label">Catégories :</span>
-    <label class="cat-filter-item">
-      <input type="checkbox" class="cat-cb" data-cat="all">
-      Tout (${enabledCount}/${totalCount})
-    </label>
-    ${allCats.map(cat => {
-      const catSites = sites.filter(s => s.cat === cat);
-      const catEnabled = catSites.filter(s => !disabled.includes(s.id)).length;
-      return `<label class="cat-filter-item">
-        <input type="checkbox" class="cat-cb" data-cat="${escHtml(cat)}">
-        ${escHtml(cat)} (${catEnabled}/${catSites.length})
-      </label>`;
-    }).join('')}
-  `;
+  bar.textContent = '';
 
-  // Set checked / indeterminate states after render
-  const allCb = bar.querySelector('[data-cat="all"]');
-  if (allCb) {
-    allCb.checked       = enabledCount === totalCount;
-    allCb.indeterminate = enabledCount > 0 && enabledCount < totalCount;
+  const labelSpan = document.createElement('span');
+  labelSpan.className = 'cat-filter-label';
+  labelSpan.textContent = 'Catégories :';
+  bar.appendChild(labelSpan);
+
+  function makeCatItem(catValue, text) {
+    const lbl = document.createElement('label');
+    lbl.className = 'cat-filter-item';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'cat-cb';
+    cb.dataset.cat = catValue;
+    lbl.appendChild(cb);
+    lbl.appendChild(document.createTextNode(' ' + text));
+    return { lbl, cb };
   }
 
+  const { lbl: allLbl, cb: allCb } = makeCatItem('all', `Tout (${enabledCount}/${totalCount})`);
+  allCb.checked       = enabledCount === totalCount;
+  allCb.indeterminate = enabledCount > 0 && enabledCount < totalCount;
+  bar.appendChild(allLbl);
+
   for (const cat of allCats) {
-    const cb = bar.querySelector(`.cat-cb[data-cat="${CSS.escape(cat)}"]`);
-    if (!cb) continue;
-    const catSites    = sites.filter(s => s.cat === cat);
-    const catEnabled  = catSites.filter(s => !disabled.includes(s.id)).length;
-    cb.checked        = catEnabled === catSites.length;
-    cb.indeterminate  = catEnabled > 0 && catEnabled < catSites.length;
+    const catSites   = sites.filter(s => s.cat === cat);
+    const catEnabled = catSites.filter(s => !disabled.includes(s.id)).length;
+    const { lbl, cb } = makeCatItem(cat, `${cat} (${catEnabled}/${catSites.length})`);
+    cb.checked       = catEnabled === catSites.length;
+    cb.indeterminate = catEnabled > 0 && catEnabled < catSites.length;
+    bar.appendChild(lbl);
   }
 }
 
@@ -140,12 +141,62 @@ function renderSitesEditor() {
     const tr = document.createElement('tr');
     tr.dataset.id = site.id;
     if (!isEnabled) tr.classList.add('site-disabled');
-    tr.innerHTML = `
-      <td class="col-check"><input type="checkbox" class="site-enable-cb" data-id="${escHtml(site.id)}" ${isEnabled ? 'checked' : ''} aria-label="${isEnabled ? 'Désactiver' : 'Activer'} ${escHtml(site.name)}"></td>
-      <td>${escHtml(site.name)}${site.cat ? `<span class="site-cat">${escHtml(site.cat)}</span>` : ''}</td>
-      <td class="url-cell"><span title="${escHtml(site.url)}">${escHtml(site.url)}</span>${site.strip_bad_char ? `<span class="strip-badge" title="Caractères ignorés par ce site">strip: <code>${escHtml(site.strip_bad_char)}</code></span>` : ''}</td>
-      <td>${isCustom ? `<button class="btn-icon btn-delete-site" data-id="${escHtml(site.id)}" aria-label="Supprimer ${escHtml(site.name)}" title="Supprimer">🗑</button>` : ''}</td>
-    `;
+
+    // Col 1 — enable/disable checkbox
+    const tdCheck = document.createElement('td');
+    tdCheck.className = 'col-check';
+    const enableCb = document.createElement('input');
+    enableCb.type = 'checkbox';
+    enableCb.className = 'site-enable-cb';
+    enableCb.dataset.id = site.id;
+    enableCb.checked = isEnabled;
+    enableCb.setAttribute('aria-label', (isEnabled ? 'Désactiver ' : 'Activer ') + site.name);
+    tdCheck.appendChild(enableCb);
+    tr.appendChild(tdCheck);
+
+    // Col 2 — name + category badge
+    const tdName = document.createElement('td');
+    tdName.textContent = site.name;
+    if (site.cat) {
+      const catSpan = document.createElement('span');
+      catSpan.className = 'site-cat';
+      catSpan.textContent = site.cat;
+      tdName.appendChild(catSpan);
+    }
+    tr.appendChild(tdName);
+
+    // Col 3 — URL template
+    const tdUrl = document.createElement('td');
+    tdUrl.className = 'url-cell';
+    const urlSpan = document.createElement('span');
+    urlSpan.title = site.url;
+    urlSpan.textContent = site.url;
+    tdUrl.appendChild(urlSpan);
+    if (site.strip_bad_char) {
+      const stripSpan = document.createElement('span');
+      stripSpan.className = 'strip-badge';
+      stripSpan.title = 'Caractères ignorés par ce site';
+      stripSpan.textContent = 'strip: ';
+      const code = document.createElement('code');
+      code.textContent = site.strip_bad_char;
+      stripSpan.appendChild(code);
+      tdUrl.appendChild(stripSpan);
+    }
+    tr.appendChild(tdUrl);
+
+    // Col 4 — delete button (custom sites only)
+    const tdAction = document.createElement('td');
+    if (isCustom) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-icon btn-delete-site';
+      delBtn.dataset.id = site.id;
+      delBtn.setAttribute('aria-label', 'Supprimer ' + site.name);
+      delBtn.title = 'Supprimer';
+      delBtn.textContent = '🗑';
+      tdAction.appendChild(delBtn);
+    }
+    tr.appendChild(tdAction);
+
     tbody.appendChild(tr);
   }
 }
