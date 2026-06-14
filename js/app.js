@@ -30,6 +30,13 @@ function restoreState() {
 
   const directMode = Storage.get('direct_mode', false);
   document.getElementById('direct-mode').checked = directMode;
+  updateDirectModeUI(directMode);
+}
+
+function updateDirectModeUI(enabled) {
+  document.body.classList.toggle('direct-mode', enabled);
+  const btn = document.getElementById('btn-generate');
+  if (btn) btn.textContent = enabled ? 'Lancer la recherche' : 'Générer les variantes';
 }
 
 // ── Leet table ─────────────────────────────────────────────────────────────────
@@ -555,6 +562,7 @@ function bindEvents() {
   // Direct mode checkbox
   document.getElementById('direct-mode').addEventListener('change', (e) => {
     Storage.set('direct_mode', e.target.checked);
+    updateDirectModeUI(e.target.checked);
   });
 
   // Leet checkboxes (delegated)
