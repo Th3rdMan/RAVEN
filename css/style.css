@@ -281,6 +281,12 @@ body {
   accent-color: var(--accent);
 }
 
+/* ── Direct mode — masquer leet & hamming via classe body ────────────────── */
+body.direct-mode [aria-labelledby="leet-heading"],
+body.direct-mode [aria-labelledby="distance-heading"] {
+  display: none;
+}
+
 /* ── Direct mode option ───────────────────────────────────────────────────── */
 .direct-mode-row {
   display: flex;

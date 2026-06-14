@@ -34,9 +34,9 @@ function restoreState() {
 }
 
 function updateDirectModeUI(enabled) {
-  document.querySelector('[aria-labelledby="leet-heading"]').style.display     = enabled ? 'none' : '';
-  document.querySelector('[aria-labelledby="distance-heading"]').style.display = enabled ? 'none' : '';
-  document.getElementById('btn-generate').textContent = enabled ? 'Lancer la recherche' : 'Générer les variantes';
+  document.body.classList.toggle('direct-mode', enabled);
+  const btn = document.getElementById('btn-generate');
+  if (btn) btn.textContent = enabled ? 'Lancer la recherche' : 'Générer les variantes';
 }
 
 // ── Leet table ─────────────────────────────────────────────────────────────────
