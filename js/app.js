@@ -2,7 +2,7 @@ let leetPairsAll      = [];
 let checkerController = null;
 
 function isDirectMode() {
-  return isDirectMode() ?? false;
+  return document.getElementById('direct-mode')?.checked ?? false;
 }
 
 async function init() {
