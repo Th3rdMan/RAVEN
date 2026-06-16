@@ -1,0 +1,781 @@
+title: Plan
+icon: mdi:floor-plan
+type: panel
+cards:
+  - type: picture-elements
+    image: /api/image/serve/134433a7c0f18b3defa2a547b528e00f/original
+    elements:
+      - type: custom:button-card
+        entity: sensor.lave_vaisselle_puissance
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          icon: |
+            [[[
+              const power = parseFloat(entity.state);
+              const running = !isNaN(power) && power > 5;
+              const color = running ? "rgba(0,180,80,0.98)" : "rgba(220,40,40,0.98)";
+              const shadow = running
+                ? "drop-shadow(0 0 6px rgba(0,180,80,0.75))"
+                : "drop-shadow(0 0 6px rgba(220,40,40,0.75))";
+              return `<ha-icon icon="mdi:dishwasher" style="
+                width:34px;
+                height:34px;
+                color:${color};
+                filter:${shadow};
+              "></ha-icon>`;
+            ]]]
+        styles:
+          card:
+            - width: 42px
+            - height: 42px
+            - padding: 0
+            - background: none
+            - box-shadow: none
+            - border: none
+            - overflow: visible
+          custom_fields:
+            icon:
+              - position: absolute
+              - inset: 0
+              - display: flex
+              - align-items: center
+              - justify-content: center
+        style:
+          top: 32.8%
+          left: 43%
+      - type: custom:button-card
+        entity: sensor.salon_thermometre_salon_temperature
+        triggers_update:
+          - sensor.salon_thermometre_salon_humidite
+        show_name: false
+        show_state: false
+        show_icon: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          room: SALON
+          temp: |
+            [[[
+              const t = parseFloat(entity.state);
+              return isNaN(t) ? "--" : `${t.toFixed(1).replace(".", ",")}°`;
+            ]]]
+          hum_label: HUMIDITÉ
+          hum: |
+            [[[
+              const h = parseFloat(states['sensor.salon_thermometre_salon_humidite']?.state);
+              return isNaN(h) ? "-- %" : `${Math.round(h)} %`;
+            ]]]
+          bar: |
+            [[[
+              const h = parseFloat(states['sensor.salon_thermometre_salon_humidite']?.state);
+              const v = isNaN(h) ? 0 : Math.max(0, Math.min(100, h));
+              return `
+                <div style="
+                  width:100%;
+                  height:6px;
+                  background:rgba(255,255,255,0.10);
+                  border-radius:999px;
+                  overflow:hidden;
+                ">
+                  <div style="
+                    width:${v}%;
+                    height:100%;
+                    border-radius:999px;
+                    background:linear-gradient(90deg,
+                      rgba(90,160,220,0.92),
+                      rgba(170,210,240,0.96)
+                    );
+                  "></div>
+                </div>
+              `;
+            ]]]
+        styles:
+          card:
+            - width: 145px
+            - height: 84px
+            - padding: 0
+            - border-radius: 18px
+            - background: >-
+                linear-gradient(180deg, rgba(24,24,24,0.93),
+                rgba(10,10,10,0.90))
+            - border: 1px solid rgba(255,255,255,0.08)
+            - box-shadow: >-
+                0 10px 26px rgba(0,0,0,0.34), inset 0 1px 0
+                rgba(255,255,255,0.04)
+            - overflow: hidden
+          custom_fields:
+            room:
+              - position: absolute
+              - top: 10px
+              - left: 14px
+              - color: rgba(255,255,255,0.50)
+              - font-size: 9px
+              - font-weight: 600
+              - letter-spacing: 1.6px
+            temp:
+              - position: absolute
+              - top: 22px
+              - left: 14px
+              - color: white
+              - font-size: 30px
+              - font-weight: 700
+              - line-height: 1
+            hum_label:
+              - position: absolute
+              - left: 14px
+              - bottom: 22px
+              - color: rgba(255,255,255,0.40)
+              - font-size: 8px
+              - font-weight: 600
+              - letter-spacing: 1.2px
+            hum:
+              - position: absolute
+              - right: 14px
+              - bottom: 18px
+              - color: rgba(255,255,255,0.88)
+              - font-size: 12px
+              - font-weight: 600
+            bar:
+              - position: absolute
+              - left: 14px
+              - right: 14px
+              - bottom: 10px
+        style:
+          top: 34.4%
+          left: 26%
+      - type: custom:button-card
+        entity: sensor.chambre_adriel_nicolas_thermometre_enfants_temperature
+        triggers_update:
+          - sensor.chambre_adriel_nicolas_thermometre_enfants_humidite
+        show_name: false
+        show_state: false
+        show_icon: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          room: ENFANTS
+          temp: |
+            [[[
+              const t = parseFloat(entity.state);
+              return isNaN(t) ? "--" : `${t.toFixed(1).replace(".", ",")}°`;
+            ]]]
+          hum_label: HUMIDITÉ
+          hum: |
+            [[[
+              const h = parseFloat(states['sensor.chambre_adriel_nicolas_thermometre_enfants_humidite']?.state);
+              return isNaN(h) ? "-- %" : `${Math.round(h)} %`;
+            ]]]
+          bar: |
+            [[[
+              const h = parseFloat(states['sensor.chambre_adriel_nicolas_thermometre_enfants_humidite']?.state);
+              const v = isNaN(h) ? 0 : Math.max(0, Math.min(100, h));
+              return `
+                <div style="
+                  width:100%;
+                  height:6px;
+                  background:rgba(255,255,255,0.10);
+                  border-radius:999px;
+                  overflow:hidden;
+                ">
+                  <div style="
+                    width:${v}%;
+                    height:100%;
+                    border-radius:999px;
+                    background:linear-gradient(90deg,
+                      rgba(90,160,220,0.92),
+                      rgba(170,210,240,0.96)
+                    );
+                  "></div>
+                </div>
+              `;
+            ]]]
+        styles:
+          card:
+            - width: 145px
+            - height: 84px
+            - padding: 0
+            - border-radius: 18px
+            - background: >-
+                linear-gradient(180deg, rgba(24,24,24,0.93),
+                rgba(10,10,10,0.90))
+            - border: 1px solid rgba(255,255,255,0.08)
+            - box-shadow: >-
+                0 10px 26px rgba(0,0,0,0.34), inset 0 1px 0
+                rgba(255,255,255,0.04)
+            - overflow: hidden
+          custom_fields:
+            room:
+              - position: absolute
+              - top: 10px
+              - left: 14px
+              - color: rgba(255,255,255,0.50)
+              - font-size: 9px
+              - font-weight: 600
+              - letter-spacing: 1.6px
+            temp:
+              - position: absolute
+              - top: 22px
+              - left: 14px
+              - color: white
+              - font-size: 30px
+              - font-weight: 700
+              - line-height: 1
+            hum_label:
+              - position: absolute
+              - left: 14px
+              - bottom: 22px
+              - color: rgba(255,255,255,0.40)
+              - font-size: 8px
+              - font-weight: 600
+              - letter-spacing: 1.2px
+            hum:
+              - position: absolute
+              - right: 14px
+              - bottom: 18px
+              - color: rgba(255,255,255,0.88)
+              - font-size: 12px
+              - font-weight: 600
+            bar:
+              - position: absolute
+              - left: 14px
+              - right: 14px
+              - bottom: 10px
+        style:
+          top: 44%
+          left: 49.5%
+      - type: custom:button-card
+        entity: sensor.salle_de_bain_thermometre_salle_de_bain_temperature
+        triggers_update:
+          - sensor.salle_de_bain_thermometre_salle_de_bain_humidite
+        show_name: false
+        show_state: false
+        show_icon: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          room: SALLE DE BAIN
+          temp: |
+            [[[
+              const t = parseFloat(entity.state);
+              return isNaN(t) ? "--" : `${t.toFixed(1).replace(".", ",")}°`;
+            ]]]
+          hum_label: HUMIDITÉ
+          hum: |
+            [[[
+              const h = parseFloat(states['sensor.salle_de_bain_thermometre_salle_de_bain_humidite']?.state);
+              return isNaN(h) ? "-- %" : `${Math.round(h)} %`;
+            ]]]
+          bar: |
+            [[[
+              const h = parseFloat(states['sensor.salle_de_bain_thermometre_salle_de_bain_humidite']?.state);
+              const v = isNaN(h) ? 0 : Math.max(0, Math.min(100, h));
+              return `
+                <div style="
+                  width:100%;
+                  height:6px;
+                  background:rgba(255,255,255,0.10);
+                  border-radius:999px;
+                  overflow:hidden;
+                ">
+                  <div style="
+                    width:${v}%;
+                    height:100%;
+                    border-radius:999px;
+                    background:linear-gradient(90deg,
+                      rgba(90,160,220,0.92),
+                      rgba(170,210,240,0.96)
+                    );
+                  "></div>
+                </div>
+              `;
+            ]]]
+        styles:
+          card:
+            - width: 145px
+            - height: 84px
+            - padding: 0
+            - border-radius: 18px
+            - background: >-
+                linear-gradient(180deg, rgba(24,24,24,0.93),
+                rgba(10,10,10,0.90))
+            - border: 1px solid rgba(255,255,255,0.08)
+            - box-shadow: >-
+                0 10px 26px rgba(0,0,0,0.34), inset 0 1px 0
+                rgba(255,255,255,0.04)
+            - overflow: hidden
+          custom_fields:
+            room:
+              - position: absolute
+              - top: 10px
+              - left: 14px
+              - color: rgba(255,255,255,0.50)
+              - font-size: 9px
+              - font-weight: 600
+              - letter-spacing: 1.6px
+            temp:
+              - position: absolute
+              - top: 22px
+              - left: 14px
+              - color: white
+              - font-size: 30px
+              - font-weight: 700
+              - line-height: 1
+            hum_label:
+              - position: absolute
+              - left: 14px
+              - bottom: 22px
+              - color: rgba(255,255,255,0.40)
+              - font-size: 8px
+              - font-weight: 600
+              - letter-spacing: 1.2px
+            hum:
+              - position: absolute
+              - right: 14px
+              - bottom: 18px
+              - color: rgba(255,255,255,0.88)
+              - font-size: 12px
+              - font-weight: 600
+            bar:
+              - position: absolute
+              - left: 14px
+              - right: 14px
+              - bottom: 10px
+        style:
+          top: 61.5%
+          left: 52.5%
+      - type: custom:button-card
+        entity: sensor.chambre_parentale_chambre_parentale_temperature
+        triggers_update:
+          - sensor.chambre_parentale_chambre_parentale_humidite
+        show_name: false
+        show_state: false
+        show_icon: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          room: PARENTALE
+          temp: |
+            [[[
+              const t = parseFloat(entity.state);
+              return isNaN(t) ? "--" : `${t.toFixed(1).replace(".", ",")}°`;
+            ]]]
+          hum_label: HUMIDITÉ
+          hum: |
+            [[[
+              const h = parseFloat(states['sensor.chambre_parentale_chambre_parentale_humidite']?.state);
+              return isNaN(h) ? "-- %" : `${Math.round(h)} %`;
+            ]]]
+          bar: |
+            [[[
+              const h = parseFloat(states['sensor.chambre_parentale_chambre_parentale_humidite']?.state);
+              const v = isNaN(h) ? 0 : Math.max(0, Math.min(100, h));
+              return `
+                <div style="
+                  width:100%;
+                  height:6px;
+                  background:rgba(255,255,255,0.10);
+                  border-radius:999px;
+                  overflow:hidden;
+                ">
+                  <div style="
+                    width:${v}%;
+                    height:100%;
+                    border-radius:999px;
+                    background:linear-gradient(90deg,
+                      rgba(90,160,220,0.92),
+                      rgba(170,210,240,0.96)
+                    );
+                  "></div>
+                </div>
+              `;
+            ]]]
+        styles:
+          card:
+            - width: 145px
+            - height: 84px
+            - padding: 0
+            - border-radius: 18px
+            - background: >-
+                linear-gradient(180deg, rgba(24,24,24,0.93),
+                rgba(10,10,10,0.90))
+            - border: 1px solid rgba(255,255,255,0.08)
+            - box-shadow: >-
+                0 10px 26px rgba(0,0,0,0.34), inset 0 1px 0
+                rgba(255,255,255,0.04)
+            - overflow: hidden
+          custom_fields:
+            room:
+              - position: absolute
+              - top: 10px
+              - left: 14px
+              - color: rgba(255,255,255,0.50)
+              - font-size: 9px
+              - font-weight: 600
+              - letter-spacing: 1.6px
+            temp:
+              - position: absolute
+              - top: 22px
+              - left: 14px
+              - color: white
+              - font-size: 30px
+              - font-weight: 700
+              - line-height: 1
+            hum_label:
+              - position: absolute
+              - left: 14px
+              - bottom: 22px
+              - color: rgba(255,255,255,0.40)
+              - font-size: 8px
+              - font-weight: 600
+              - letter-spacing: 1.2px
+            hum:
+              - position: absolute
+              - right: 14px
+              - bottom: 18px
+              - color: rgba(255,255,255,0.88)
+              - font-size: 12px
+              - font-weight: 600
+            bar:
+              - position: absolute
+              - left: 14px
+              - right: 14px
+              - bottom: 10px
+        style:
+          top: 55.7%
+          left: 18%
+      - type: custom:button-card
+        entity: sensor.chambre_benjamin_thermometre_benjamin_temperature
+        triggers_update:
+          - sensor.chambre_benjamin_thermometre_benjamin_humidite
+        show_name: false
+        show_state: false
+        show_icon: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          room: BENJAMIN
+          temp: |
+            [[[
+              const t = parseFloat(entity.state);
+              return isNaN(t) ? "--" : `${t.toFixed(1).replace(".", ",")}°`;
+            ]]]
+          hum_label: HUMIDITÉ
+          hum: |
+            [[[
+              const h = parseFloat(states['sensor.chambre_benjamin_thermometre_benjamin_humidite']?.state);
+              return isNaN(h) ? "-- %" : `${Math.round(h)} %`;
+            ]]]
+          bar: |
+            [[[
+              const h = parseFloat(states['sensor.chambre_benjamin_thermometre_benjamin_humidite']?.state);
+              const v = isNaN(h) ? 0 : Math.max(0, Math.min(100, h));
+              return `
+                <div style="
+                  width:100%;
+                  height:6px;
+                  background:rgba(255,255,255,0.10);
+                  border-radius:999px;
+                  overflow:hidden;
+                ">
+                  <div style="
+                    width:${v}%;
+                    height:100%;
+                    border-radius:999px;
+                    background:linear-gradient(90deg,
+                      rgba(90,160,220,0.92),
+                      rgba(170,210,240,0.96)
+                    );
+                  "></div>
+                </div>
+              `;
+            ]]]
+        styles:
+          card:
+            - width: 145px
+            - height: 84px
+            - padding: 0
+            - border-radius: 18px
+            - background: >-
+                linear-gradient(180deg, rgba(24,24,24,0.93),
+                rgba(10,10,10,0.90))
+            - border: 1px solid rgba(255,255,255,0.08)
+            - box-shadow: >-
+                0 10px 26px rgba(0,0,0,0.34), inset 0 1px 0
+                rgba(255,255,255,0.04)
+            - overflow: hidden
+          custom_fields:
+            room:
+              - position: absolute
+              - top: 10px
+              - left: 14px
+              - color: rgba(255,255,255,0.50)
+              - font-size: 9px
+              - font-weight: 600
+              - letter-spacing: 1.6px
+            temp:
+              - position: absolute
+              - top: 22px
+              - left: 14px
+              - color: white
+              - font-size: 30px
+              - font-weight: 700
+              - line-height: 1
+            hum_label:
+              - position: absolute
+              - left: 14px
+              - bottom: 22px
+              - color: rgba(255,255,255,0.40)
+              - font-size: 8px
+              - font-weight: 600
+              - letter-spacing: 1.2px
+            hum:
+              - position: absolute
+              - right: 14px
+              - bottom: 18px
+              - color: rgba(255,255,255,0.88)
+              - font-size: 12px
+              - font-weight: 600
+            bar:
+              - position: absolute
+              - left: 14px
+              - right: 14px
+              - bottom: 10px
+        style:
+          top: 77%
+          left: 18%
+      - type: custom:button-card
+        entity: sensor.seche_linge_puissance
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          icon: |
+            [[[
+              const power = parseFloat(entity.state);
+              const running = !isNaN(power) && power > 5;
+              const color = running ? "rgba(0,180,80,0.98)" : "rgba(220,40,40,0.98)";
+              const shadow = running
+                ? "drop-shadow(0 0 6px rgba(0,180,80,0.75))"
+                : "drop-shadow(0 0 6px rgba(220,40,40,0.75))";
+              return `<ha-icon icon="mdi:tumble-dryer" style="
+                width:34px;
+                height:34px;
+                color:${color};
+                filter:${shadow};
+              "></ha-icon>`;
+            ]]]
+        styles:
+          card:
+            - width: 42px
+            - height: 42px
+            - padding: 0
+            - background: none
+            - box-shadow: none
+            - border: none
+            - overflow: visible
+          custom_fields:
+            icon:
+              - position: absolute
+              - inset: 0
+              - display: flex
+              - align-items: center
+              - justify-content: center
+        style:
+          top: 68%
+          left: 45.5%
+      - type: custom:button-card
+        entity: sensor.lave_linge_puissance
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          icon: |
+            [[[
+              const power = parseFloat(entity.state);
+              const running = !isNaN(power) && power > 5;
+              const color = running ? "rgba(0,180,80,0.98)" : "rgba(220,40,40,0.98)";
+              const shadow = running
+                ? "drop-shadow(0 0 6px rgba(0,180,80,0.75))"
+                : "drop-shadow(0 0 6px rgba(220,40,40,0.75))";
+              return `<ha-icon icon="mdi:washing-machine" style="
+                width:34px;
+                height:34px;
+                color:${color};
+                filter:${shadow};
+              "></ha-icon>`;
+            ]]]
+        styles:
+          card:
+            - width: 42px
+            - height: 42px
+            - padding: 0
+            - background: none
+            - box-shadow: none
+            - border: none
+            - overflow: visible
+          custom_fields:
+            icon:
+              - position: absolute
+              - inset: 0
+              - display: flex
+              - align-items: center
+              - justify-content: center
+        style:
+          top: 68%
+          left: 48.8%
+      - type: custom:button-card
+        entity: weather.forecast_maison
+        show_name: false
+        show_state: false
+        show_icon: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          room: TERRASSE
+          icon: |
+            [[[
+              const s = entity.state;
+              const icons = {
+                "clear-night": "mdi:weather-night",
+                "cloudy": "mdi:weather-cloudy",
+                "fog": "mdi:weather-fog",
+                "hail": "mdi:weather-hail",
+                "lightning": "mdi:weather-lightning",
+                "lightning-rainy": "mdi:weather-lightning-rainy",
+                "partlycloudy": "mdi:weather-partly-cloudy",
+                "pouring": "mdi:weather-pouring",
+                "rainy": "mdi:weather-rainy",
+                "snowy": "mdi:weather-snowy",
+                "snowy-rainy": "mdi:weather-snowy-rainy",
+                "sunny": "mdi:weather-sunny",
+                "windy": "mdi:weather-windy",
+                "windy-variant": "mdi:weather-windy-variant",
+                "exceptional": "mdi:alert-circle-outline"
+              };
+              const icon = icons[s] || "mdi:weather-partly-cloudy";
+              return `<ha-icon icon="${icon}" style="width:30px;height:30px;color:white;opacity:0.92;"></ha-icon>`;
+            ]]]
+          temp: |
+            [[[
+              const t = entity.attributes.temperature;
+              if (t === undefined || t === null) return "--";
+              const n = Number(t);
+              return isNaN(n) ? `${t}°` : `${n.toFixed(1).replace(".", ",")}°`;
+            ]]]
+          cond: |
+            [[[
+              const s = entity.state;
+              const labels = {
+                "clear-night": "Nuit claire",
+                "cloudy": "Nuageux",
+                "fog": "Brouillard",
+                "hail": "Grêle",
+                "lightning": "Orage",
+                "lightning-rainy": "Orage",
+                "partlycloudy": "Éclaircies",
+                "pouring": "Forte pluie",
+                "rainy": "Pluie",
+                "snowy": "Neige",
+                "snowy-rainy": "Neige / pluie",
+                "sunny": "Ensoleillé",
+                "windy": "Venteux",
+                "windy-variant": "Venteux",
+                "exceptional": "Alerte"
+              };
+              return labels[s] || s;
+            ]]]
+        styles:
+          card:
+            - width: 150px
+            - height: 84px
+            - padding: 0
+            - border-radius: 18px
+            - background: >-
+                linear-gradient(180deg, rgba(24,24,24,0.93),
+                rgba(10,10,10,0.90))
+            - border: 1px solid rgba(255,255,255,0.08)
+            - box-shadow: >-
+                0 10px 26px rgba(0,0,0,0.34), inset 0 1px 0
+                rgba(255,255,255,0.04)
+            - overflow: hidden
+          custom_fields:
+            room:
+              - position: absolute
+              - top: 10px
+              - left: 14px
+              - color: rgba(255,255,255,0.50)
+              - font-size: 9px
+              - font-weight: 600
+              - letter-spacing: 1.6px
+            icon:
+              - position: absolute
+              - left: 14px
+              - top: 30px
+            temp:
+              - position: absolute
+              - right: 14px
+              - top: 20px
+              - color: white
+              - font-size: 28px
+              - font-weight: 700
+              - line-height: 1
+            cond:
+              - position: absolute
+              - left: 14px
+              - bottom: 12px
+              - color: rgba(255,255,255,0.75)
+              - font-size: 11px
+              - font-weight: 500
+        style:
+          top: 19.5%
+          left: 75%
+      - type: custom:button-card
+        entity: binary_sensor.porte_terrasse
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: more-info
+        custom_fields:
+          icon: |
+            [[[
+              const open = entity.state === "on";
+              const icon = open ? "mdi:lock-open" : "mdi:lock";
+              const color = open ? "rgba(0,180,80,0.98)" : "rgba(220,40,40,0.98)";
+              const shadow = open
+                ? "drop-shadow(0 0 6px rgba(0,180,80,0.75))"
+                : "drop-shadow(0 0 6px rgba(220,40,40,0.75))";
+              return `<ha-icon icon="${icon}" style="
+                width:34px;
+                height:34px;
+                color:${color};
+                filter:${shadow};
+              "></ha-icon>`;
+            ]]]
+        styles:
+          card:
+            - width: 42px
+            - height: 42px
+            - padding: 0
+            - background: none
+            - box-shadow: none
+            - border: none
+            - overflow: visible
+          custom_fields:
+            icon:
+              - position: absolute
+              - inset: 0
+              - display: flex
+              - align-items: center
+              - justify-content: center
+        style:
+          top: 18%
+          left: 59%
