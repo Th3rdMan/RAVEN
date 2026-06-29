@@ -2,22 +2,15 @@
 import socket
 import json
 import base64
-import sys
 
 HOST = "57.128.112.118"
 PORT = 1337
-PROXY = ("127.0.0.1", 34129)
 
 
 def ask_vera(message: str) -> str:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(PROXY)
+    s.connect((HOST, PORT))
     s.settimeout(30)
-
-    s.sendall(f"CONNECT {HOST}:{PORT} HTTP/1.1\r\nHost: {HOST}:{PORT}\r\n\r\n".encode())
-    resp = s.recv(1024)
-    if b"200" not in resp:
-        raise ConnectionError(f"Proxy refused: {resp[:100]}")
 
     body = json.dumps({"message": message}).encode()
     req = (
@@ -88,6 +81,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # Use proxy only if running inside this cloud environment.
-    # Remove PROXY and replace with direct connect if running locally.
     main()
